@@ -1,0 +1,39 @@
+搬瓦工的cn2gia可以说是最快的线路，但是美中不足，不支持奈飞，怎么办？
+
+再购买一台可以看奈飞的机器B即可，但是B的直连速度 又不能保证，解决方案就是 通过在搬瓦工上安装haproxy做请求转发就行了。
+
+最终方案，
+1.搬瓦工安装haproxy    （本人用的搬瓦工的传家宝39刀的cn2gia）
+2.vpsB安装ss-server. （本人使用 hosteons）
+3.终端设备安直连 搬瓦工。 (https://github.com/zlqlpp/kexueshangwang_in_one_mini )
+
+
+haproxy安装说明：
+1.vps使用centos系统，
+2.安装haproxy
+   yum -y install haproxy   
+3.编辑配置文件
+  vim /etc/haproxy/haproxy.cfg
+  3.1 将下边的   5259   改成 vpsB的ss-server的端口号
+  3.2 将 127.0.0.1     改成 vpsB的 IP
+  
+  global
+
+defaults
+    log global
+    mode    tcp
+    option  dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+
+frontend ss-in
+    bind *:5259
+    default_backend ss-out
+
+backend ss-out
+    server server1 127.0.0.1 maxconn 20480
+    
+4.启动服务并设置开机启动
+  systemctl start haproxy
+  systemctl enable haproxy
